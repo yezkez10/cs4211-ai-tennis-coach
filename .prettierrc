@@ -1,0 +1,44 @@
+{
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "objectWrap": "preserve",
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "useTabs": false,
+  "printWidth": 80,
+  "overrides": [
+    {
+      "files": "webapp/**/*.{ts,tsx}",
+      "options": {
+        "importOrder": [
+          "^react$",
+          "<THIRD_PARTY_MODULES>",
+          "^@cs4211",
+          "^(App|client|main|notification|queryClient|router|routeTree\\.gen|theme)$",
+          "^components",
+          "^hooks",
+          "^mrt",
+          "^utils"
+        ]
+      }
+    },
+    {
+      "files": "server/**/*.{ts,tsx}",
+      "options": {
+        "importOrder": [
+          "^env$",
+          "<THIRD_PARTY_MODULES>",
+          "^packages",
+          "^@cs4211",
+          "^app",
+          "^db",
+          "^middleware",
+          "^routes",
+          "^utils"
+        ]
+      }
+    }
+  ]
+}

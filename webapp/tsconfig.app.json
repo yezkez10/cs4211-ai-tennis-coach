@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "noEmit": true,
+    "paths": {
+      "@cs4211/common/schemas": ["../../common/src/schemas/index.ts"],
+      "@cs4211/common/const": ["../../common/src/const/index.ts"]
+    },
+    "tsBuildInfoFile": "./dist/.tsconfig.tsbuildinfo.json"
+  },
+  "references": [{ "path": "../server" }, { "path": "../common" }],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

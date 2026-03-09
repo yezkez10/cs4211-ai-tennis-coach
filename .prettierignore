@@ -1,0 +1,11 @@
+# lock files
+package-lock.json
+pnpm-lock.yaml
+migration_lock.toml
+
+# template files
+templates/
+
+# auto generated files
+routeTree.gen.ts
+drizzle

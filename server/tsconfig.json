@@ -1,0 +1,23 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "jsx": "react-jsx",
+    "noEmit": false,
+    "outDir": "./dist",
+    "paths": {
+      "@cs4211/common/schemas": ["../../common/src/schemas/index.ts"],
+      "@cs4211/common/const": ["../../common/src/const/index.ts"]
+    },
+    "tsBuildInfoFile": "./dist/.tsconfig.tsbuildinfo.json"
+  },
+  "references": [{ "path": "../common" }],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "drizzle.config.ts",
+    "graphile.config.ts",
+    "scripts/esbuild.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

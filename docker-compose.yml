@@ -1,0 +1,17 @@
+services:
+  postgres:
+    container_name: cs4211_postgres
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: cs4211_admin
+      POSTGRES_PASSWORD: some-secure-secret
+      POSTGRES_DB: cs4211
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  minio_data:

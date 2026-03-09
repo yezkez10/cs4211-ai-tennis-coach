@@ -1,0 +1,11 @@
+{
+  "name": "common",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint-check": "run-p lint-check:no-fix",
+    "lint-check:no-fix": "eslint src --config ./eslint.config.js  --max-warnings 0",
+    "lint": "run-p lint:fix",
+    "lint:fix": "eslint src --config ./eslint.config.js --max-warnings 0 --fix"
+  }
+}
