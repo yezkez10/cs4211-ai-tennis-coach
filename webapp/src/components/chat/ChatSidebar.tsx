@@ -37,7 +37,7 @@ export function ChatSidebar({
               />
             ))}
       </Stack>
-      <Button onClick={endUserSession} variant="subtle" color="red" mt="auto">
+      <Button onClick={endUserSession} variant="outline" color="red" mt="auto">
         Logout
       </Button>
     </Stack>
