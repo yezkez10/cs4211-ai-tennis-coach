@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-import { Box, Loader, Stack, Title } from '@mantine/core';
+import { Box, Group, Loader, Stack, Text, Title } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { client } from 'client';
@@ -33,6 +33,7 @@ export function ChatBody({ conversationId, onConversationCreated }: Props) {
     messagesToRender,
     setPendingUserMessage,
     isStreaming,
+    hasReceivedContent,
   } = useStreamingMessages({
     serverMessages: serverMessages ?? [],
     abortControllerRef,
@@ -90,6 +91,8 @@ export function ChatBody({ conversationId, onConversationCreated }: Props) {
 
   const hasMessages = messagesToRender.length > 0;
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const isWaitingForResponse =
+    isMessageSending || (isStreaming && !hasReceivedContent);
 
   useEffect(() => {
     setTimeout(
@@ -113,6 +116,14 @@ export function ChatBody({ conversationId, onConversationCreated }: Props) {
               {messagesToRender.map((message) => (
                 <MessageBubble key={message.id} message={message} />
               ))}
+              {isWaitingForResponse && (
+                <Group gap="0">
+                  <Loader size="xs" mr="xs" />
+                  <Text c="dimmed" fz="sm">
+                    Thinking...
+                  </Text>
+                </Group>
+              )}
             </Stack>
           ) : (
             <Title ta="center">What are you working on?</Title>

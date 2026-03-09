@@ -33,6 +33,7 @@ export function useStreamingMessages({
     bufferRef.current = [];
     tokenCountRef.current = 0;
     setIsStreaming(false);
+    setHasReceivedContent(false);
   }, [abortControllerRef]);
 
   useEffect(() => {
@@ -45,11 +46,13 @@ export function useStreamingMessages({
   const [pendingUserMessage, setPendingUserMessage] = useState<
     NonNullableUseGetConversationData[number] | null
   >(null);
+
   const [streamingMessage, setStreamingMessage] = useState<
     NonNullableUseGetConversationData[number] | null
   >(null);
 
   const [isStreaming, setIsStreaming] = useState(false);
+  const [hasReceivedContent, setHasReceivedContent] = useState(false);
   const bufferRef = useRef<string[]>([]);
   const tokenCountRef = useRef<number>(0);
   const TOKEN_BATCH_SIZE = 10;
@@ -81,14 +84,12 @@ export function useStreamingMessages({
 
     setStreamingMessage((prev) => {
       if (!prev) return null;
-      return {
-        ...prev,
-        content: prev.content + nextChunk,
-      };
+      return { ...prev, content: prev.content + nextChunk };
     });
   };
 
   const handleMessage = (token: string) => {
+    setHasReceivedContent(true);
     bufferRef.current.push(token);
     tokenCountRef.current++;
 
@@ -133,6 +134,7 @@ export function useStreamingMessages({
       return;
     }
     setIsStreaming(true);
+    setHasReceivedContent(false);
 
     const reader = stream.getReader();
     const decoder = new TextDecoder();
@@ -182,6 +184,7 @@ export function useStreamingMessages({
       }
     } finally {
       setIsStreaming(false);
+      setHasReceivedContent(false);
     }
   };
 
@@ -191,5 +194,6 @@ export function useStreamingMessages({
     messagesToRender,
     setPendingUserMessage,
     isStreaming,
+    hasReceivedContent,
   };
 }

@@ -4,7 +4,6 @@ import { type Env, Hono, type Context as HonoContext, type Input } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { streamSSE } from 'hono/streaming';
 import {
-  type ChatCompletionChunk,
   type ChatCompletionMessageParam,
   type ChatModel,
 } from 'openai/resources';
@@ -156,60 +155,13 @@ export const converstationApp = new Hono()
         },
       });
 
-      let conversationMessages: ChatCompletionMessageParam[] =
+      const conversationMessages: ChatCompletionMessageParam[] =
         buildConversationForAi(messages, newUserMessage.id);
-
-      // Step 1: non-streaming call to check for tool calls
-      const initialResponse = await openAi.chat.completions.create({
-        model: OPEN_AI_MODEL,
-        messages: conversationMessages,
-        tools: toolSchemas,
-        tool_choice: 'auto',
-        stream: false,
-      });
-
-      const initialMessage = initialResponse.choices[0]?.message;
-      if (!initialMessage) throw new HTTPException(500);
-
-      conversationMessages = [...conversationMessages, initialMessage];
-
-      // Step 2: execute tool calls if any
-      for (const toolCall of initialMessage.tool_calls ?? []) {
-        if (toolCall.type !== 'function') continue;
-
-        const tool = toolMap[toolCall.function.name];
-        if (!tool) continue;
-
-        const args = JSON.parse(toolCall.function.arguments) as Record<
-          string,
-          unknown
-        >;
-        // eslint-disable-next-line no-console
-        console.log(
-          `[tool] executing ${toolCall.function.name} with args:`,
-          args,
-        );
-        const result = await tool.execute(args);
-        // eslint-disable-next-line no-console
-        console.log(`[tool] ${toolCall.function.name} result:`, result);
-
-        conversationMessages.push({
-          role: 'tool',
-          tool_call_id: toolCall.id,
-          content: JSON.stringify(result),
-        });
-      }
-
-      // Step 3: stream final response
-      const chatStream = await openAi.chat.completions.create({
-        model: OPEN_AI_MODEL,
-        messages: conversationMessages,
-        stream: true,
-      });
 
       return streamChatResponse({
         context: c,
-        chatStream,
+        openAi,
+        conversationMessages,
         conversationId: finalConversationId,
         currentMessageId: newUserMessage.id,
       });
@@ -287,52 +239,120 @@ interface StreamChatResponseArgs<
   I extends Input = Input,
 > {
   context: HonoContext<E, P, I>;
-  chatStream: AsyncIterable<ChatCompletionChunk>;
+  openAi: ReturnType<typeof createOpenAi>;
+  conversationMessages: ChatCompletionMessageParam[];
   conversationId: number;
   currentMessageId: number;
 }
 
 function streamChatResponse({
   context,
-  chatStream,
+  openAi,
+  conversationMessages,
   conversationId,
   currentMessageId,
 }: StreamChatResponseArgs) {
   return streamSSE(context, async (stream) => {
-    await db.transaction(async (tx) => {
-      const assistantMessage = await tx
-        .insert(message)
-        .values({
-          conversationId,
-          role: 'assistant',
-          content: '',
-          parentMessageId: currentMessageId,
-        })
-        .returning({ id: message.id })
-        .then(takeUniqueOrThrow);
+    const assistantMessage = await db
+      .insert(message)
+      .values({
+        conversationId,
+        role: 'assistant',
+        content: '',
+        parentMessageId: currentMessageId,
+      })
+      .returning({ id: message.id })
+      .then(takeUniqueOrThrow);
 
-      await stream.writeSSE({
-        event: 'meta',
-        data: JSON.stringify({
-          userMessageId: currentMessageId,
-          assistantMessageId: assistantMessage.id,
-          conversationId,
-        }),
+    await stream.writeSSE({
+      event: 'meta',
+      data: JSON.stringify({
+        userMessageId: currentMessageId,
+        assistantMessageId: assistantMessage.id,
+        conversationId,
+      }),
+    });
+
+    let currentMessages = conversationMessages;
+    const allChunks: string[] = [];
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    while (true) {
+      const chatStream = await openAi.chat.completions.create({
+        model: OPEN_AI_MODEL,
+        messages: currentMessages,
+        tools: toolSchemas,
+        tool_choice: 'auto',
+        stream: true,
       });
 
-      const chunks: string[] = [];
+      const toolCallAccumulator: Record<
+        number,
+        { id: string; name: string; args: string }
+      > = {};
+      let hasToolCalls = false;
+
       for await (const chunk of chatStream) {
-        const delta = chunk.choices[0]?.delta.content;
-        if (delta) {
-          chunks.push(delta);
-          await stream.writeSSE({ data: delta });
+        const delta = chunk.choices[0]?.delta;
+        if (!delta) continue;
+
+        if (delta.tool_calls) {
+          hasToolCalls = true;
+          for (const tc of delta.tool_calls) {
+            const existing = toolCallAccumulator[tc.index] ?? {
+              id: '',
+              name: '',
+              args: '',
+            };
+            toolCallAccumulator[tc.index] = existing;
+            if (tc.id) existing.id = tc.id;
+            if (tc.function?.name) existing.name += tc.function.name;
+            if (tc.function?.arguments) existing.args += tc.function.arguments;
+          }
+        }
+
+        if (delta.content) {
+          allChunks.push(delta.content);
+          await stream.writeSSE({ data: delta.content });
         }
       }
 
-      await tx
-        .update(message)
-        .set({ content: chunks.join('') })
-        .where(eq(message.id, assistantMessage.id));
-    });
+      if (!hasToolCalls) break;
+
+      const assistantToolMessage: ChatCompletionMessageParam = {
+        role: 'assistant',
+        content: allChunks.join('') || null,
+        tool_calls: Object.entries(toolCallAccumulator).map(([, tc]) => ({
+          id: tc.id,
+          type: 'function' as const,
+          function: { name: tc.name, arguments: tc.args },
+        })),
+      };
+
+      currentMessages = [...currentMessages, assistantToolMessage];
+
+      for (const tc of Object.values(toolCallAccumulator)) {
+        const tool = toolMap[tc.name];
+        if (!tool) continue;
+
+        const args = JSON.parse(tc.args) as Record<string, unknown>;
+        // eslint-disable-next-line no-console
+        console.log(`[tool] executing ${tc.name} with args:`, args);
+        const result = await tool.execute(args);
+        // eslint-disable-next-line no-console
+        console.log(`[tool] ${tc.name} result:`, result);
+
+        currentMessages.push({
+          role: 'tool',
+          tool_call_id: tc.id,
+          content: JSON.stringify(result),
+        });
+      }
+    }
+
+    await db
+      .update(message)
+      .set({ content: allChunks.join('') })
+      .where(eq(message.id, assistantMessage.id));
   });
 }
