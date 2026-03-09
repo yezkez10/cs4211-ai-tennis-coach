@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build:tsc": "tsc --build",
-    "build:vite": "vite build",
-    "build": "run-s build:tsc build:vite",
+    "build": "vite build",
     "lint-check": "run-p build:tsc lint-check:no-fix",
     "lint-check:no-fix": "eslint src --config ./eslint.config.js  --max-warnings 0",
     "lint": "run-p build:tsc lint:fix",
