@@ -3,7 +3,12 @@ import { and, eq } from 'drizzle-orm';
 import { type Env, Hono, type Context as HonoContext, type Input } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { streamSSE } from 'hono/streaming';
-import { type ChatCompletionChunk, type ChatModel } from 'openai/resources';
+import {
+  type ChatCompletionChunk,
+  type ChatCompletionMessageParam,
+  type ChatModel,
+} from 'openai/resources';
+import { tools } from 'tools';
 import { z } from 'zod';
 
 import { db } from 'db';
@@ -20,6 +25,11 @@ import { takeFirstOrThrow, takeUniqueOrThrow } from 'utils/db';
 
 const DEFAULT_CONVERSATION_TITLE = 'New Chat';
 const OPEN_AI_MODEL: ChatModel = 'gpt-4.1-nano';
+
+const toolSchemas = tools.map((t) => t.schema);
+const toolMap = Object.fromEntries(
+  tools.map((t) => [t.schema.function.name, t]),
+);
 
 export const converstationApp = new Hono()
   .get('/', authMiddleware(), async (c) => {
@@ -146,9 +156,54 @@ export const converstationApp = new Hono()
         },
       });
 
+      let conversationMessages: ChatCompletionMessageParam[] =
+        buildConversationForAi(messages, newUserMessage.id);
+
+      // Step 1: non-streaming call to check for tool calls
+      const initialResponse = await openAi.chat.completions.create({
+        model: OPEN_AI_MODEL,
+        messages: conversationMessages,
+        tools: toolSchemas,
+        tool_choice: 'auto',
+        stream: false,
+      });
+
+      const initialMessage = initialResponse.choices[0]?.message;
+      if (!initialMessage) throw new HTTPException(500);
+
+      conversationMessages = [...conversationMessages, initialMessage];
+
+      // Step 2: execute tool calls if any
+      for (const toolCall of initialMessage.tool_calls ?? []) {
+        if (toolCall.type !== 'function') continue;
+
+        const tool = toolMap[toolCall.function.name];
+        if (!tool) continue;
+
+        const args = JSON.parse(toolCall.function.arguments) as Record<
+          string,
+          unknown
+        >;
+        // eslint-disable-next-line no-console
+        console.log(
+          `[tool] executing ${toolCall.function.name} with args:`,
+          args,
+        );
+        const result = await tool.execute(args);
+        // eslint-disable-next-line no-console
+        console.log(`[tool] ${toolCall.function.name} result:`, result);
+
+        conversationMessages.push({
+          role: 'tool',
+          tool_call_id: toolCall.id,
+          content: JSON.stringify(result),
+        });
+      }
+
+      // Step 3: stream final response
       const chatStream = await openAi.chat.completions.create({
         model: OPEN_AI_MODEL,
-        messages: buildConversationForAi(messages, newUserMessage.id),
+        messages: conversationMessages,
         stream: true,
       });
 
