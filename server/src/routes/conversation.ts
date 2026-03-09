@@ -1,3 +1,5 @@
+import { ENV_VARS } from 'env';
+
 import { CREATE_TITLE_PROMPT, createOpenAi } from 'ai';
 import { and, eq } from 'drizzle-orm';
 import { type Env, Hono, type Context as HonoContext, type Input } from 'hono';
@@ -23,7 +25,7 @@ import {
 import { takeFirstOrThrow, takeUniqueOrThrow } from 'utils/db';
 
 const DEFAULT_CONVERSATION_TITLE = 'New Chat';
-const OPEN_AI_MODEL: ChatModel = 'gpt-4.1-nano';
+const OPEN_AI_MODEL = ENV_VARS.OPENAI_MODEL as ChatModel;
 
 const toolSchemas = tools.map((t) => t.schema);
 const toolMap = Object.fromEntries(

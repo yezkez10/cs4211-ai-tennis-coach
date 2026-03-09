@@ -10,6 +10,7 @@ const envKeys = [
   'PORT',
   'DATABASE_URL',
   'OPENAI_API_KEY',
+  'OPENAI_MODEL',
 ] as const;
 
 export type EnvKeys = (typeof envKeys)[number];
