@@ -1,12 +1,7 @@
-import { Button } from '@mantine/core';
 import { createFileRoute } from '@tanstack/react-router';
 
-import { endUserSession } from 'utils/auth';
+import { Chat } from 'components/chat/Chat';
 
 export const Route = createFileRoute('/_authenticated/chat')({
-  component: RouteComponent,
+  component: () => <Chat />,
 });
-
-function RouteComponent() {
-  return <Button onClick={endUserSession}>Logout</Button>;
-}

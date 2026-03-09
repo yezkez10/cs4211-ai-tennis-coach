@@ -5,7 +5,12 @@ const nodeEnvs = ['production', 'development'] as const;
 export type NodeEnv = (typeof nodeEnvs)[number];
 
 // Should match the keys in the .env.example file
-const envKeys = ['JWT_SECRET', 'PORT', 'DATABASE_URL'] as const;
+const envKeys = [
+  'JWT_SECRET',
+  'PORT',
+  'DATABASE_URL',
+  'OPENAI_API_KEY',
+] as const;
 
 export type EnvKeys = (typeof envKeys)[number];
 

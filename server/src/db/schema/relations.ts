@@ -18,5 +18,9 @@ export const relations = defineRelationsPart(schema, (r) => ({
       from: r.message.conversationId,
       to: r.conversation.id,
     }),
+    parentMessage: r.one.message({
+      from: r.message.parentMessageId,
+      to: r.message.id,
+    }),
   },
 }));

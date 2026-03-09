@@ -11,6 +11,7 @@ import { DEFAULT_ERROR_MESSAGE, USER_COOKIE_NAME } from '@cs4211/common/const';
 import { devMiddleware } from 'middlewares/dev';
 
 import { authApp } from 'routes/auth';
+import { converstationApp } from 'routes/conversation';
 
 const { PORT, NODE_ENV } = ENV_VARS;
 const servePort = parseInt(PORT, 10);
@@ -19,7 +20,8 @@ const apiRoutes = new Hono()
   .get('/health', (c) => {
     return c.json({ message: 'healthy!', NODE_ENV });
   })
-  .route('/auth', authApp);
+  .route('/auth', authApp)
+  .route('/conversation', converstationApp);
 
 const app = new Hono();
 const _route = app

@@ -7,6 +7,7 @@ CREATE TABLE "conversation" (
 --> statement-breakpoint
 CREATE TABLE "messages" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "messages_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
+	"parent_message_id" integer,
 	"conversation_id" integer NOT NULL,
 	"role" text NOT NULL,
 	"content" text NOT NULL,
@@ -21,4 +22,5 @@ CREATE TABLE "user" (
 );
 --> statement-breakpoint
 ALTER TABLE "conversation" ADD CONSTRAINT "conversation_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "messages" ADD CONSTRAINT "messages_conversation_id_conversation_id_fkey" FOREIGN KEY ("conversation_id") REFERENCES "conversation"("id") ON DELETE CASCADE;
+ALTER TABLE "messages" ADD CONSTRAINT "messages_conversation_id_conversation_id_fkey" FOREIGN KEY ("conversation_id") REFERENCES "conversation"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "messages" ADD CONSTRAINT "fk_message_parent" FOREIGN KEY ("parent_message_id") REFERENCES "messages"("id") ON UPDATE CASCADE;
