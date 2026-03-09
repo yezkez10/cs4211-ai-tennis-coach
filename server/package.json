@@ -15,7 +15,7 @@
     "db:prod:setup": "run-s db:mig",
     "build:prod": "cross-env NODE_ENV=production node scripts/esbuild.ts",
     "build:tsc": "tsc --build",
-    "build": "run-s build:tsc build:prod test",
+    "build": "run-s build:tsc build:prod",
     "lint-check": "run-p build:tsc lint-check:no-fix",
     "lint-check:no-fix": "eslint src --config ./eslint.config.js  --max-warnings 0",
     "lint": "run-p build:tsc lint:fix",
