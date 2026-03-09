@@ -7,10 +7,10 @@ import { client } from 'client';
 export function useLoginMutation() {
   return useMutation<undefined, string, LoginFormSchema>({
     mutationFn: async (data: LoginFormSchema) => {
-      await client.api.auth.login.$post({
-        json: data,
-      });
+      const response = await client.api.auth.login.$post({ json: data });
+      if (response.ok) {
+        location.reload();
+      }
     },
-    onSuccess: () => location.reload(),
   });
 }
