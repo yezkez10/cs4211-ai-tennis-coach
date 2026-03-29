@@ -58,3 +58,11 @@ CREATE INDEX IF NOT EXISTS idx_shots_outcome ON tennis_data.shots(shot_outcome);
 COPY tennis_data.shots
 FROM '/docker-entrypoint-initdb.d/tennis.csv'
 WITH (FORMAT CSV, HEADER FALSE, NULL '');
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE INDEX IF NOT EXISTS idx_shots_player1_trgm 
+ON tennis_data.shots USING gin(player1_name gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_shots_player2_trgm 
+ON tennis_data.shots USING gin(player2_name gin_trgm_ops);
