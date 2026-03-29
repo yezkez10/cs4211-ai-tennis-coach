@@ -12,3 +12,6 @@ reports/
 .env
 .env.development
 .env.production
+
+# ignore raw data file (too big)
+data/raw/
