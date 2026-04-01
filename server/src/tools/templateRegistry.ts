@@ -19,6 +19,7 @@ export const PAT_TEMPLATES: TemplateMap = {
 };
 
 // Resolves template path dynamically using the hand property inside the outputted stats objects.
+// Used in executePat.ts
 export function resolveTemplatePath(p1Hand: string | null, p2Hand: string | null): string {
   const h1 = (p1Hand?.toUpperCase().startsWith('L') ? 'LH' : 'RH') as Handedness;
   const h2 = (p2Hand?.toUpperCase().startsWith('L') ? 'LH' : 'RH') as Handedness;
