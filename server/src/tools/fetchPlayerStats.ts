@@ -3,6 +3,18 @@ import { type Tool } from 'tools/types';
 
 import { db } from 'db';
 
+// interface defitions for the output of the fetchPlayerStats tool, for type safety and clarity when accessing properties in executePAT.ts
+export interface PlayerStats {
+  playerName: string;
+  requestedName: string;
+  hand: { hand: string } | null;
+  serveDirections: any[]; // replace any with specific row types where applicable
+  serveOutcomes: any[];
+  returnOutcomes: any[];
+  rallyOutcomes: any[];
+  error?: string;
+}
+
 async function findClosestPlayerName(
   playerName: string,
 ): Promise<{ matched_name: string; similarity: number } | null> {
@@ -131,7 +143,7 @@ export const fetchPlayerStats: Tool = {
       },
     },
   },
-  execute: async (args) => {
+  execute: async (args) : Promise<PlayerStats> => {
     const { playerName } = args as { playerName: string };
 
     let resolvedName = playerName;
@@ -143,13 +155,9 @@ export const fetchPlayerStats: Tool = {
     if (!hand) {
       const match = await findClosestPlayerName(playerName);
       if (!match) {
-        return {
-          error: `Player "${playerName}" not found. Please check the spelling.`,
-          playerName,
-        };
+        throw new Error(`Player "${playerName}" not found. Please check the spelling.`);
       }
       resolvedName = match.matched_name;
-
       hand = await queryHandedness(resolvedName);
     }
 
