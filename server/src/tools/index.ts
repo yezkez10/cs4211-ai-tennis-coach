@@ -1,4 +1,4 @@
 import { fetchPlayerStats } from 'tools/fetchPlayerStats';
-import { runPatModel } from 'tools/runPatModel';
+import { buildPatModel } from './buildPatModel';
 
-export const tools = [runPatModel, fetchPlayerStats];
+export const tools = [buildPatModel, fetchPlayerStats];
