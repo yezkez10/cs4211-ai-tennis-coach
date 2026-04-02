@@ -3,6 +3,7 @@ import { resolveTemplatePath } from 'tools/templateRegistry';
 import { computeProbabilities } from './calculateProbs';
 import { type Tool } from 'tools/types';
 import { readFile } from 'fs/promises';
+import fs from 'fs';
 
 // interface defitions for the output of the fetchPlayerStats tool, for type safety and clarity when accessing properties in executePAT.ts
 export interface PlayerStats {
@@ -70,20 +71,36 @@ export const executePat: Tool = {
       fetchPlayerStats.execute({ playerName: player2Name }),
     ]) as [PlayerStats, PlayerStats];
 
+    console.log('P1 Stats:', JSON.stringify(p1Stats, null, 2));
+    console.log('P2 Stats:', JSON.stringify(p2Stats, null, 2));
+
     // compute probabilities
     const tokens = computeProbabilities(p1Stats as any, p2Stats as any);
+    console.log('Token map', {
+      P1_DE_1ST_WIN:   tokens.P1_DE_1ST_WIN,
+      P2RET_DE_T_WIN:  tokens.P2RET_DE_T_WIN,
+      P1RALLY_DE_WIN:  tokens.P1RALLY_DE_WIN,
+    });
 
     // pick the right PAT template
     const templatePath = resolveTemplatePath(
       p1Stats.hand?.hand ?? 'RH',
       p2Stats.hand?.hand ?? 'RH',
     );
+    console.log('Resolved template path:', templatePath);
+
     const template = await readFile(templatePath, 'utf-8');
 
-    // Step 5b: inject
+    // Inject probabilities into the template
     const filledModel = injectProbabilities(template, tokens);
 
-    // Step 6: run PAT
+    // output filled model into output/filled_models for debugging
+    await fs.promises.mkdir('output/filled_models', { recursive: true });
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `output/filled_models/${player1Name}_vs_${player2Name}_${timestamp}.pcsp`;
+    await fs.promises.writeFile(filename, filledModel);
+    console.log(`Filled model written to ${filename}`);
+
     const p1WinProb = await runPat(filledModel);
 
     return {

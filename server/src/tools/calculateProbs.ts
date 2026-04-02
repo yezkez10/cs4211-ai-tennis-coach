@@ -162,6 +162,8 @@ export function computeProbabilities(
     getServeDir(p1.serveDirections, 2, 3),
   );
 
+  console.log('P1 Serve Probs:', { p1_de_1st, p1_de_2nd, p1_ad_1st, p1_ad_2nd });
+
   // ── Player 2 serves ──────────────────────────────────────────────────────
   const p2_de_1st = calcServeProbs(
     getServeOut(p2.serveOutcomes, 1, 1),
@@ -179,6 +181,8 @@ export function computeProbabilities(
     getServeOut(p2.serveOutcomes, 2, 3),
     getServeDir(p2.serveDirections, 2, 3),
   );
+
+  console.log('P2 Serve Probs:', { p2_de_1st, p2_de_2nd, p2_ad_1st, p2_ad_2nd });
 
   // ── Player 2's return vs Player 1's serve ────────────────────────────────
   // prev_direction: 4=wide, 5=body, 6=T  |  from_court: 1=deuce, 3=ad
