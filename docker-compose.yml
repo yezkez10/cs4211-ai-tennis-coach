@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: cs4211
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./data/raw/tennisabstract-v2-combined.csv:/docker-entrypoint-initdb.d/tennis.csv:ro
+      - ./server/src/db/seed/raw/tennisabstract-v2-combined.csv:/data/tennis.csv:ro
 
 volumes:
   postgres_data:

@@ -11,6 +11,8 @@
     "db:gen": "cross-env NODE_ENV=development drizzle-kit generate --config=./drizzle.config.ts",
     "db:seed": "cross-env NODE_ENV=development tsx ./src/db/seed/index.ts",
     "db:mig": "cross-env NODE_ENV=development drizzle-kit migrate --config=./drizzle.config.ts",
+    "db:load-shot": "docker exec cs4211_postgres psql -U cs4211_admin -d cs4211 -c \"COPY public.shot FROM '/data/tennis.csv' WITH (FORMAT CSV, HEADER FALSE, NULL '')\"",
+    "db:dump-shot": "docker exec cs4211_postgres pg_dump -U cs4211_admin -d cs4211 --data-only --disable-triggers -Fc -t public.shot > src/db/seed/seed.dump",
     "db:dev:setup": "run-s db:reset db:mig db:seed",
     "db:prod:setup": "run-s db:mig",
     "build:prod": "cross-env NODE_ENV=production tsx scripts/esbuild.ts",
