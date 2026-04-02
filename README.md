@@ -34,25 +34,13 @@ cp .env.development.example .env.development
 
 Open `.env.development` and fill in your `OPENAI_API_KEY`.
 
-### 3. Place the dataset
-
-Put the CSV at:
-
-```
-./data/raw/tennisabstract-v2-combined.csv
-```
-
-> This file is not in the repo due to its size (~1.7GB). Obtain it separately from the TA.
-
-### 4. Start all services
+### 3. Start all services
 
 ```bash
 pnpm run dev:docker
 ```
 
-Wait until you see `COPY 6421491` in the logs, then `Ctrl+C`. This loads all 6.4M shot records into the `tennis_data` schema and only needs to be done once.
-
-### 5. Set up the application schema
+### 4. Set up the application schema
 
 ```bash
 cd server
