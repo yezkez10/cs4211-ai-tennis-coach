@@ -26,16 +26,6 @@ function injectProbabilities(template: string, tokens: Record<string, number>): 
   return result;
 }
 
-function runPat(modelContent: string): Promise<number> {
-  // This function would contain the logic to execute the PAT model, e.g. by calling a CLI tool or an API.
-  // For demonstration, we return a mocked probability after a delay.
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(0.673); // Mocked probability
-    }, 5000);
-  });
-}
-
 export const executePat: Tool = {
   schema: {
     type: 'function' as const,
