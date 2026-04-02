@@ -9,12 +9,12 @@ interface TemplateMap {
 // Map the combinations to your physical file paths
 export const PAT_TEMPLATES: TemplateMap = {
   'RH': {
-    'RH': '../server/src/templates/Sample_RH_RH_4Regions.pcsp',
-    'LH': '../server/src/templates/Sample_RH_LH_4Regions.pcsp',
+    'RH': '../templates/Sample_RH_RH_4Regions.pcsp',
+    'LH': '../templates/Sample_RH_LH_4Regions.pcsp',
   },
   'LH': {
-    'RH': '../server/src/templates/Sample_LH_RH_4Regions.pcsp',
-    'LH': '../server/src/templates/Sample_LH_LH_4Regions.pcsp',
+    'RH': '../templates/Sample_LH_RH_4Regions.pcsp',
+    'LH': '../templates/Sample_LH_LH_4Regions.pcsp',
   }
 };
 

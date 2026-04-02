@@ -112,14 +112,16 @@ async function queryRallyOutcomes(playerName: string) {
   return result.rows;
 }
 
-async function queryHandedness(playerName: string) {
+async function queryHandedness(
+  playerName: string,
+): Promise<{ hand: string } | null> {
   const result = await db.execute(sql`
     SELECT DISTINCT player1_hand AS hand
     FROM tennis_data.shots
     WHERE player1_name = ${playerName}
     LIMIT 1
   `);
-  return result.rows[0] ?? null;
+  return (result.rows[0] as { hand: string } | undefined) ?? null;
 }
 
 export const fetchPlayerStats: Tool = {

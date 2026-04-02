@@ -1,0 +1,71 @@
+
+fetchPlayerStats output
+{
+  "playerName": "Novak Djokovic",
+  "hand": { "hand": "RH" },
+  "serveDirections": [
+    { "shot_type": 1, "from_court": 1, "serve_t": 120, "serve_body": 40, "serve_wide": 80, "serve_total": 240 }
+  ],
+  "serveOutcomes": [
+    { "shot_type": 1, "from_court": 1, "aces": 24, "serve_winners": 12, "faults": 48, "in_play": 216, "total": 300 }
+  ],
+  "returnOutcomes": [
+    { "player2_hand": "LH", "prev_direction": 6, "from_court": 1, "return_winners": 15, "return_errors": 30, "return_in_play": 105, "total": 150 }
+  ],
+  "rallyOutcomes": [
+    { "from_court": 1, "rally_winners": 80, "rally_errors": 60, "crosscourt": 200, "downline": 100, "total": 440 }
+  ]
+}
+
+// token returned from calculating probs
+{
+    // Player 1 — Deuce court serves
+    P1_DE_1ST_WIN:   p1_de_1st.win,   P1_DE_1ST_T:   p1_de_1st.t,
+    P1_DE_1ST_WIDE:  p1_de_1st.wide,  P1_DE_1ST_BODY: p1_de_1st.body,  P1_DE_1ST_ERROR: p1_de_1st.error,
+
+    P1_DE_2ND_WIN:   p1_de_2nd.win,   P1_DE_2ND_T:   p1_de_2nd.t,
+    P1_DE_2ND_WIDE:  p1_de_2nd.wide,  P1_DE_2ND_BODY: p1_de_2nd.body,  P1_DE_2ND_ERROR: p1_de_2nd.error,
+
+    // Player 1 — Ad court serves
+    P1_AD_1ST_WIN:   p1_ad_1st.win,   P1_AD_1ST_T:   p1_ad_1st.t,
+    P1_AD_1ST_WIDE:  p1_ad_1st.wide,  P1_AD_1ST_BODY: p1_ad_1st.body,  P1_AD_1ST_ERROR: p1_ad_1st.error,
+
+    P1_AD_2ND_WIN:   p1_ad_2nd.win,   P1_AD_2ND_T:   p1_ad_2nd.t,
+    P1_AD_2ND_WIDE:  p1_ad_2nd.wide,  P1_AD_2ND_BODY: p1_ad_2nd.body,  P1_AD_2ND_ERROR: p1_ad_2nd.error,
+
+    // Player 2 — Deuce court serves
+    P2_DE_1ST_WIN:   p2_de_1st.win,   P2_DE_1ST_T:   p2_de_1st.t,
+    P2_DE_1ST_WIDE:  p2_de_1st.wide,  P2_DE_1ST_BODY: p2_de_1st.body,  P2_DE_1ST_ERROR: p2_de_1st.error,
+
+    P2_DE_2ND_WIN:   p2_de_2nd.win,   P2_DE_2ND_T:   p2_de_2nd.t,
+    P2_DE_2ND_WIDE:  p2_de_2nd.wide,  P2_DE_2ND_BODY: p2_de_2nd.body,  P2_DE_2ND_ERROR: p2_de_2nd.error,
+
+    // Player 2 — Ad court serves
+    P2_AD_1ST_WIN:   p2_ad_1st.win,   P2_AD_1ST_T:   p2_ad_1st.t,
+    P2_AD_1ST_WIDE:  p2_ad_1st.wide,  P2_AD_1ST_BODY: p2_ad_1st.body,  P2_AD_1ST_ERROR: p2_ad_1st.error,
+
+    P2_AD_2ND_WIN:   p2_ad_2nd.win,   P2_AD_2ND_T:   p2_ad_2nd.t,
+    P2_AD_2ND_WIDE:  p2_ad_2nd.wide,  P2_AD_2ND_BODY: p2_ad_2nd.body,  P2_AD_2ND_ERROR: p2_ad_2nd.error,
+
+    // Player 2 returning Player 1's serve
+    P2RET_DE_T_WIN: p2ret_de_T.win, P2RET_DE_T_CC: p2ret_de_T.crosscourt, P2RET_DE_T_DL: p2ret_de_T.downline, P2RET_DE_T_ERR: p2ret_de_T.error,
+    P2RET_DE_WIDE_WIN: p2ret_de_wide.win, P2RET_DE_WIDE_CC: p2ret_de_wide.crosscourt, P2RET_DE_WIDE_DL: p2ret_de_wide.downline, P2RET_DE_WIDE_ERR: p2ret_de_wide.error,
+    P2RET_DE_BODY_WIN: p2ret_de_body.win, P2RET_DE_BODY_CC: p2ret_de_body.crosscourt, P2RET_DE_BODY_DL: p2ret_de_body.downline, P2RET_DE_BODY_ERR: p2ret_de_body.error,
+    P2RET_AD_T_WIN: p2ret_ad_T.win, P2RET_AD_T_CC: p2ret_ad_T.crosscourt, P2RET_AD_T_DL: p2ret_ad_T.downline, P2RET_AD_T_ERR: p2ret_ad_T.error,
+    P2RET_AD_WIDE_WIN: p2ret_ad_wide.win, P2RET_AD_WIDE_CC: p2ret_ad_wide.crosscourt, P2RET_AD_WIDE_DL: p2ret_ad_wide.downline, P2RET_AD_WIDE_ERR: p2ret_ad_wide.error,
+    P2RET_AD_BODY_WIN: p2ret_ad_body.win, P2RET_AD_BODY_CC: p2ret_ad_body.crosscourt, P2RET_AD_BODY_DL: p2ret_ad_body.downline, P2RET_AD_BODY_ERR: p2ret_ad_body.error,
+
+    // Player 1 returning Player 2's serve
+    P1RET_DE_T_WIN: p1ret_de_T.win, P1RET_DE_T_CC: p1ret_de_T.crosscourt, P1RET_DE_T_DL: p1ret_de_T.downline, P1RET_DE_T_ERR: p1ret_de_T.error,
+    P1RET_DE_WIDE_WIN: p1ret_de_wide.win, P1RET_DE_WIDE_CC: p1ret_de_wide.crosscourt, P1RET_DE_WIDE_DL: p1ret_de_wide.downline, P1RET_DE_WIDE_ERR: p1ret_de_wide.error,
+    P1RET_DE_BODY_WIN: p1ret_de_body.win, P1RET_DE_BODY_CC: p1ret_de_body.crosscourt, P1RET_DE_BODY_DL: p1ret_de_body.downline, P1RET_DE_BODY_ERR: p1ret_de_body.error,
+    P1RET_AD_T_WIN: p1ret_ad_T.win, P1RET_AD_T_CC: p1ret_ad_T.crosscourt, P1RET_AD_T_DL: p1ret_ad_T.downline, P1RET_AD_T_ERR: p1ret_ad_T.error,
+    P1RET_AD_WIDE_WIN: p1ret_ad_wide.win, P1RET_AD_WIDE_CC: p1ret_ad_wide.crosscourt, P1RET_AD_WIDE_DL: p1ret_ad_wide.downline, P1RET_AD_WIDE_ERR: p1ret_ad_wide.error,
+    P1RET_AD_BODY_WIN: p1ret_ad_body.win, P1RET_AD_BODY_CC: p1ret_ad_body.crosscourt, P1RET_AD_BODY_DL: p1ret_ad_body.downline, P1RET_AD_BODY_ERR: p1ret_ad_body.error,
+
+    // Rally
+    P1RALLY_DE_WIN: p1rally_de.win, P1RALLY_DE_CC: p1rally_de.crosscourt, P1RALLY_DE_DL: p1rally_de.downline, P1RALLY_DE_ERR: p1rally_de.error,
+    P1RALLY_AD_WIN: p1rally_ad.win, P1RALLY_AD_CC: p1rally_ad.crosscourt, P1RALLY_AD_DL: p1rally_ad.downline, P1RALLY_AD_ERR: p1rally_ad.error,
+    P2RALLY_DE_WIN: p2rally_de.win, P2RALLY_DE_CC: p2rally_de.crosscourt, P2RALLY_DE_DL: p2rally_de.downline, P2RALLY_DE_ERR: p2rally_de.error,
+    P2RALLY_AD_WIN: p2rally_ad.win, P2RALLY_AD_CC: p2rally_ad.crosscourt, P2RALLY_AD_DL: p2rally_ad.downline, P2RALLY_AD_ERR: p2rally_ad.error,
+  };

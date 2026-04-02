@@ -1,0 +1,203 @@
+To do:
+-	Separate player statistics acc to deuce court and ad court
+
+What the LLM has to do: 
+1.	we enter in the handedness of player 1 and player 2
+2.	LLM chooses the PAT template from the list 
+3.	LLM chooses the relevant data from the database
+4.	LLM plugs in the variables and probabilities/ raw shot counts
+5.	LLM returns win probability of player 1
+
+
+//       *****
+// 	    Player1: Left Handed
+// de_ct  ad_ct
+// -----+-----
+// |    |    |
+// | 1  |  2 |
+// |    |    |
+// |=========|
+// |    |    |
+// | 3  |  4 |
+// |    |    |
+// -----+----+
+// ad_ct  de_ct
+// 	    Player2: Right Handed
+//       *****
+
+enum{f_ad_ct, f_de_ct, n_ad_ct, n_de_ct}; //serve position: ad court or deuce court
+enum{player1, player2, na};
+
+var turn = f_de_ct; //serve turn;
+var fscore = 0;
+var nscore = 0;
+var won = na;
+var ball = 9;
+
+TieBreakGame = WhoServe1st; (Player1Serve [] Player2Serve);
+
+WhoServe1st = []i:{f_de_ct,n_de_ct}@ TossCoin{turn = i} -> Skip;
+Player1Serve = [won == na && turn == f_de_ct ]FedReady_DeCt -> De_Ply1Serve [] [won == na && turn == f_ad_ct] FedReady_AdCt -> Ad_Ply1Serve;
+
+
+// Service Scenarios
+De_Ply1Serve = pcase {                        
+			4: Win{fscore++; if (fscore == 7) {won = player1} else { turn = (turn+1)%4 }} -> NextPt
+			31: ServeT_in{ball= 4} -> Ply2_BackHandR  // T will have opponent response by serve T
+			20: ServeWide_in{ball =4} -> Ply2_ForeHandR 
+			11: ServeBody_in{ball=4} -> (Ply2_BackHandR [] Ply2_ForeHandR)
+			34: Error -> De_Ply1Serve_2nd
+			};
+
+De_Ply1Serve_2nd = pcase {                 //1st serve is out
+			0: Win{fscore++; if (fscore == 7) {won = player1} else { turn = (turn+1)%4 }} -> NextPt
+			41: ServeT_in{ball= 4} -> Ply2_BackHandR  
+			13: ServeWide_in{ball =4} -> Ply2_ForeHandR 
+			38: ServeBody_in{ball=4} -> (Ply2_BackHandR [] Ply2_ForeHandR)
+			8: Error -> Fdoublefault{nscore++; if (nscore == 7) {won = player2} else { turn = (turn+1)%4 }} -> NextPt
+     		};
+     		
+Ad_Ply1Serve = pcase {
+			5: Win{fscore++; if (fscore == 7) {won = player1} else { turn = (turn+1)%4 }} -> NextPt
+			18: ServeT_in{ball= 3} -> Ply2_ForeHandR  
+			34: ServeWide_in{ball = 3} -> Ply2_BackHandR
+			13: ServeBody_in{ball= 3} -> (Ply2_BackHandR [] Ply2_ForeHandR)
+			30: Error -> Ad_Ply1Serve_2nd
+			};
+
+Ad_Ply1Serve_2nd = pcase {                 //1st serve is out
+			0: Win{fscore++; if (fscore == 7) {won = player1} else { turn = (turn+1)%4 }} -> NextPt
+			11: ServeT_in{ball= 3} -> Ply2_ForeHandR  
+			41: ServeWide_in{ball =3} -> Ply2_BackHandR
+			40: ServeBody_in{ball=3} -> (Ply2_BackHandR [] Ply2_ForeHandR)
+			8: Error -> Fdoublefault{nscore++; if (nscore == 7) {won = player2} else { turn = (turn+1)%4 }} -> NextPt
+     		};    
+
+NextPt = Player1Serve [] Player2Serve [] ([won != na] GameOver -> Skip);
+
+
+Player2Serve = [won == na && turn == n_de_ct]NadReady_DeCt -> De_Ply2Serve [] [ won == na && turn == n_ad_ct] NadReady_AdCt -> Ad_Ply2Serve;
+
+De_Ply2Serve = pcase {
+			12: Win{nscore++; if (nscore == 7) {won = player2} else { turn = (turn+1)%4 }} -> NextPt
+			25: ServeT_in{ball= 1} -> Ply1_ForeHandR
+			25: ServeWide_in{ball =1} -> Ply1_BackHandR
+			3: ServeBody_in{ball=1} -> (Ply1_ForeHandR [] Ply1_BackHandR)
+			35: Error -> De_Ply2Serve_2nd
+			};
+
+De_Ply2Serve_2nd = pcase {                 //1st serve is out
+			1: Win{nscore++; if (nscore == 7) {won = player2} else { turn = (turn+1)%4 }} -> NextPt
+			33: ServeT_in{ball= 1} -> Ply1_ForeHandR
+			30: ServeWide_in{ball =1} -> Ply1_BackHandR
+      		31: ServeBody_in{ball=1} -> (Ply1_ForeHandR [] Ply1_BackHandR)
+			5: Error -> Fdoublefault{fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt
+     		};
+     		 
+Ad_Ply2Serve = pcase {
+			10: Win{nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+			21: ServeT_in{ball= 2} -> Ply1_BackHandR
+			28: ServeWide_in{ball =2} -> Ply1_ForeHandR
+			3: ServeBody_in{ball=2} -> (Ply1_ForeHandR [] Ply1_BackHandR)
+			38: Error -> Ad_Ply2Serve_2nd
+			};
+
+Ad_Ply2Serve_2nd = pcase {                 //1st serve is out
+			1: Win{nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+			24: ServeT_in{ball= 2} -> Ply1_BackHandR
+			44: ServeWide_in{ball =2} -> Ply1_ForeHandR
+			25: ServeBody_in{ball=2} -> (Ply1_ForeHandR [] Ply1_BackHandR)
+			6: Error -> Fdoublefault{fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt
+     		};
+ 	     
+// Rally Scenarios
+Ply1_de_stroke = pcase{
+			7: Win {fscore++; if (fscore == 7) {won = player1} else { turn = (turn+1)%4 }} -> NextPt
+			44: Crosscourt { ball = 4} -> Ply2_de_stroke
+			32: Downline { ball = 3} -> Ply2_ad_stroke
+			17: Error  -> {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+			};
+Ply1_ad_stroke = pcase{
+			7: Win {fscore++; if (fscore == 7) {won = player1} else { turn = (turn+1)%4 }} -> NextPt
+			52: Crosscourt { ball = 3} -> Ply2_ad_stroke
+			25: Downline { ball = 4} -> Ply2_de_stroke
+			16: Error  -> {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+			};
+Ply2_de_stroke = pcase { 
+			9: Win {nscore++; if (nscore == 7) {won = player2} else { turn = (turn+1)%4 }} -> NextPt
+			39: Crosscourt { ball = 1;} -> Ply1_de_stroke
+			30: Downline { ball = 2} -> Ply1_ad_stroke
+			22: Error -> {fscore++; if (fscore == 7) {won = player1} else { turn = (turn+1)%4 }} -> NextPt
+			};
+Ply2_ad_stroke = pcase{
+			9: Win {nscore++; if (nscore == 7) {won = player2} else { turn = (turn+1)%4 }} -> NextPt
+			49: Crosscourt { ball = 2} -> Ply1_ad_stroke
+			21: Downline { ball = 1} -> Ply1_de_stroke
+			21: Error -> {fscore++; if (fscore == 7) {won = player1} else { turn = (turn+1)%4 }} -> NextPt
+			};    		                                                            
+
+// Return Scenarios
+Ply2_BackHandR = ifa (turn == f_de_ct) {    // Player2 backhand return to Player1 serve from the deuce court side
+			pcase {
+			5: BH_Win1 {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+			45: BH_InsideIn {ball = 2} -> Ply1_ad_stroke
+			30: BH_InsideOut { ball = 1} -> Ply1_de_stroke
+			20: BH_Error1 -> {fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt
+      		 }}
+      		 else {
+      		pcase {
+      		2: BH_Win2 {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+			36: BH_CrossCourt { ball = 2} -> Ply1_ad_stroke
+			36: BH_DownLine { ball = 1} -> Ply1_de_stroke
+			26: BH_Error2 -> {fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt
+      		 }};
+      		 
+Ply2_ForeHandR = ifa (turn == f_de_ct) {    // Player2 forehand return to Player1 serve from the deuce court side
+			pcase {
+			4: FH_Win1 {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+			33: FH_CrossCourt { ball = 1;} -> Ply1_de_stroke
+			33: FH_DownLine { ball = 2} -> Ply1_ad_stroke
+			30: FH_Error1 -> {fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt
+      		 }}
+      		 else {
+      		pcase {
+      		5: FH_Win2 {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+			45: FH_InsideOut { ball = 2} -> Ply1_ad_stroke
+			30: FH_InsideIn { ball = 1} -> Ply1_de_stroke
+			20: FH_Error2 -> {fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt		
+      		 }};
+      		 
+Ply1_ForeHandR = ifa (turn == n_de_ct) {    // Player2 backhand return to Player1 serve from the deuce court side
+			pcase {
+			2: FH_Win1 {fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt
+			36: FH_InsideIn {ball = 3} -> Ply2_ad_stroke
+			36: FH_InsideOut { ball = 4} -> Ply2_de_stroke
+			26: FH_Error1 -> {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+      		 }}
+      		 else {
+      		pcase {
+      		5: FH_Win2 {fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt
+			45: FH_CrossCourt { ball = 3} -> Ply2_ad_stroke
+			30: FH_DownLine { ball = 4} -> Ply2_de_stroke
+			20: FH_Error2 -> {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+      		 }};
+
+Ply1_BackHandR = ifa (turn == n_de_ct) {    // Player2 forehand return to Player1 serve from the deuce court side
+			pcase {
+			5: BH_Win1 {fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt
+			45: BH_Crosscourt { ball = 4} -> Ply2_de_stroke
+			30: BH_Downline { ball = 3} -> Ply2_ad_stroke
+			20: BH_Error1  -> {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+      		 }}
+      		 else {
+      		pcase {
+      		2: BH_Win2 {fscore++; if (fscore == 7) {won = player1} else  { turn = (turn+1)%4 }} -> NextPt
+			38: BH_InsideOut { ball = 3} -> Ply2_ad_stroke
+			38: BH_InsideIn { ball = 4} -> Ply2_de_stroke
+			22: BH_Error2 -> {nscore++; if (nscore == 7) {won = player2} else  { turn = (turn+1)%4 }} -> NextPt
+      		 }};
+
+#define player1Win won == player1;
+#define player2Win won == player2;
+
+#assert TieBreakGame reaches player1Win with prob;
