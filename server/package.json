@@ -6,14 +6,14 @@
     ".": "./src/exports.ts"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development node scripts/esbuild.ts",
+    "dev": "cross-env NODE_ENV=development tsx scripts/esbuild.ts",
     "db:reset": "docker exec -i cs4211_postgres psql -U cs4211_admin -d cs4211 < ./scripts/reset.sql",
     "db:gen": "cross-env NODE_ENV=development drizzle-kit generate --config=./drizzle.config.ts",
     "db:seed": "cross-env NODE_ENV=development tsx ./src/db/seed/index.ts",
     "db:mig": "cross-env NODE_ENV=development drizzle-kit migrate --config=./drizzle.config.ts",
     "db:dev:setup": "run-s db:reset db:mig db:seed",
     "db:prod:setup": "run-s db:mig",
-    "build:prod": "cross-env NODE_ENV=production node scripts/esbuild.ts",
+    "build:prod": "cross-env NODE_ENV=production tsx scripts/esbuild.ts",
     "build:tsc": "tsc --build",
     "build": "run-s build:tsc build:prod",
     "lint-check": "run-p build:tsc lint-check:no-fix",
