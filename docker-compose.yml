@@ -11,18 +11,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./data/raw/tennisabstract-v2-combined.csv:/docker-entrypoint-initdb.d/tennis.csv:ro
-    restart: unless-stopped
-    networks:
-      - cs4211_net
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U cs4211_admin -d cs4211']
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-networks:
-  cs4211_net:
-    driver: bridge
 
 volumes:
   postgres_data:
