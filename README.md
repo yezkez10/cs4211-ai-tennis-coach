@@ -11,7 +11,7 @@ The system is implemented in Node.js and integrates an LLM (GPT-4o) for natural 
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
-- Node.js 20+ and pnpm installed
+- Node.js 20+ and ppnpm installed
 - An OpenAI API key
 - The raw CSV dataset (obtain from the TA's Google Drive — not included in the repo)
 
@@ -44,25 +44,19 @@ Put the CSV at:
 
 > This file is not in the repo due to its size (~1.7GB). Obtain it separately from the TA.
 
-### 4. Seed the database (first time only)
+### 4. Start all services
 
 ```bash
-docker compose up postgres
+pnpm run dev:docker
 ```
 
 Wait until you see `COPY 6421491` in the logs, then `Ctrl+C`. This loads all 6.4M shot records into the `tennis_data` schema and only needs to be done once.
 
-### 5. Start all services
-
-```bash
-npm run dev:docker
-```
-
-### 6. Set up the application schema
+### 5. Set up the application schema
 
 ```bash
 cd server
-npm run db:dev:setup
+pnpm run db:dev:setup
 cd ..
 ```
 
@@ -85,7 +79,7 @@ This runs migrations and seeds the application database (users, conversations).
 After the first setup, just run:
 
 ```bash
-npm run dev:docker
+pnpm run dev:docker
 ```
 
 No need to re-seed the database unless you run `docker compose down -v`.
@@ -166,7 +160,7 @@ Restart-Service postgresql-x64-18
 ```
 
 6. Deploy App Files
-   - Build locally on Mac: cd server && pnpm build && cd ..
+   - Build locally on Mac: cd server && ppnpm build && cd ..
    - In Microsoft Remote Desktop, edit connection > Folders > redirect local dist folder
    - Connect via RDP and copy files to C:\Users\Administrator\Desktop\cs4211
    - Files needed: index.cjs, package.json, node_modules/, .env.production
