@@ -27,4 +27,3 @@ networks:
 
 volumes:
   postgres_data:
-  minio_data:
