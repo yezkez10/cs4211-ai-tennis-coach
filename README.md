@@ -50,6 +50,14 @@ cd ..
 
 This runs migrations and seeds the application database (users, conversations).
 
+### 5. Start Development
+
+After the first setup, just run for other subsequent runs:
+
+```bash
+pnpm run dev
+```
+
 ---
 
 ## Accessing the App
@@ -59,18 +67,6 @@ This runs migrations and seeds the application database (users, conversations).
 | Webapp   | http://localhost:5173                                 |
 | Server   | http://localhost:3000/api/health                      |
 | Database | `localhost:5432` (user: `cs4211_admin`, db: `cs4211`) |
-
----
-
-## Subsequent Starts
-
-After the first setup, just run:
-
-```bash
-pnpm run dev:docker
-```
-
-No need to re-seed the database unless you run `docker compose down -v`.
 
 ---
 
