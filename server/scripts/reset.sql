@@ -7,5 +7,3 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO public;
 
 DROP SCHEMA IF EXISTS drizzle CASCADE;
-
-DROP SCHEMA IF EXISTS graphile_worker CASCADE;
