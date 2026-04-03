@@ -23,4 +23,5 @@ export const relations = defineRelationsPart(schema, (r) => ({
       to: r.message.id,
     }),
   },
+  shot: {},
 }));
