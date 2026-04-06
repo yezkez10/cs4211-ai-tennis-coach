@@ -74,7 +74,7 @@ async function queryReturnOutcomes(playerName: string) {
     FROM public.shot
     WHERE player2_name = ${playerName}
       AND shot_type = 3
-      AND from_court IN (1, 3)
+      AND from_court IN (1, 2, 3)
       AND prev_direction IN (4, 5, 6)
     GROUP BY player2_hand, prev_direction, from_court
     ORDER BY from_court, prev_direction

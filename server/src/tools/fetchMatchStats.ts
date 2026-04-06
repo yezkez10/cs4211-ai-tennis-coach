@@ -4,10 +4,6 @@ import { type Tool } from 'tools/types';
 import { db } from 'db';
 import { shot } from 'db/schema';
 
-// ---------------------------------------------------------------------------
-// Helper: fuzzy-match a player name against player1_name column
-// ---------------------------------------------------------------------------
-
 async function findClosestPlayerName(
   playerName: string,
 ): Promise<{ player1Name: string; similarity: number } | null> {
@@ -37,18 +33,6 @@ async function resolvePlayerName(playerName: string): Promise<string | null> {
   const match = await findClosestPlayerName(playerName);
   return match ? match.player1Name : null;
 }
-
-// ---------------------------------------------------------------------------
-// H2H-scoped query helpers
-//
-// The dataset stores each shot from the serving/hitting player's perspective
-// as player1. In a match between A and B, rows alternate:
-//   - A as player1, B as player2  (when A is serving or hitting)
-//   - B as player1, A as player2  (when B is serving or hitting)
-//
-// Each helper accepts (p1, p2) = the two resolved names and returns stats
-// for BOTH players, labelled by their role in that row.
-// ---------------------------------------------------------------------------
 
 const h2hFilter = (p1: string, p2: string) =>
   or(
