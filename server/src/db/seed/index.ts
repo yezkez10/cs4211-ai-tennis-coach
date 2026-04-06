@@ -2,6 +2,7 @@ import argon2 from 'argon2';
 import { execSync } from 'child_process';
 
 import { db } from 'db';
+import { sql } from 'drizzle-orm';
 import { user } from 'db/schema';
 
 const users = Array.from({ length: 5 }, (_, i) => ({
@@ -19,6 +20,9 @@ async function seed() {
       .values({ ...u, password: hashed })
       .onConflictDoNothing();
   }
+
+  console.log('Enabling pg_trgm extension...');
+  await db.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
 
   console.log('Seeding shots...');
   execSync(
