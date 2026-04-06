@@ -1,7 +1,7 @@
-import { fetchPlayerStats } from 'tools/fetchPlayerStats';
-import { resolveTemplatePath } from 'tools/templateRegistry';
-import { computeProbabilities } from './calculateProbs';
-import { type Tool } from 'tools/types';
+import { fetchPlayerStats } from './fetchPlayerStats';
+import { resolveTemplatePath } from './helpers/templateRegistry';
+import { injectStats } from './helpers/injectStats';
+import { type Tool } from './types';
 import { readFile } from 'fs/promises';
 import fs from 'fs';
 
@@ -15,15 +15,6 @@ export interface PlayerStats {
   returnOutcomes: any[];
   rallyOutcomes: any[];
   error?: string;
-}
-
-function injectProbabilities(template: string, tokens: Record<string, number>): string {
-  let result = template;
-  for (const [key, value] of Object.entries(tokens)) {
-    const placeholder = `{{${key}}}`;
-    result = result.replaceAll(placeholder, value.toString());
-  }
-  return result;
 }
 
 export const executePat: Tool = {
@@ -55,46 +46,37 @@ export const executePat: Tool = {
       player2Name: string;
     };
 
-    // fetch stats
-    const [p1Stats, p2Stats] = await Promise.all([
-      fetchPlayerStats.execute({ playerName: player1Name }),
-      fetchPlayerStats.execute({ playerName: player2Name }),
-    ]) as [PlayerStats, PlayerStats];
+    /**fetch stats
 
     console.log('P1 Stats:', JSON.stringify(p1Stats, null, 2));
     console.log('P2 Stats:', JSON.stringify(p2Stats, null, 2));
 
-    // compute probabilities
-    const tokens = computeProbabilities(p1Stats as any, p2Stats as any);
-    console.log('Token map', {
-      P1_DE_1ST_WIN:   tokens.P1_DE_1ST_WIN,
-      P2RET_DE_T_WIN:  tokens.P2RET_DE_T_WIN,
-      P1RALLY_DE_WIN:  tokens.P1RALLY_DE_WIN,
-    });
+
+    const template = await readFile(templatePath, 'utf-8');
+
+    // output filled model into output/filled_models for debugging
+    await fs.promises.mkdir('output/filled_models', { recursive: true });
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `output/filled_models/${player1Name}_vs_${player2Name}_${timestamp}.pcsp`;
+    // await fs.promises.writeFile(filename, filledModel);
+    console.log(`Filled model written to ${filename}`);
+
+    // const p1WinProb = await runPat(filledModel);
+    */
+    const [p1Stats, p2Stats] = await Promise.all([
+      fetchPlayerStats.execute({ playerName: player1Name }),
+      fetchPlayerStats.execute({ playerName: player2Name }),
+    ]) as [PlayerStats, PlayerStats];
 
     // pick the right PAT template
     const templatePath = resolveTemplatePath(
       p1Stats.hand?.hand ?? 'RH',
       p2Stats.hand?.hand ?? 'RH',
     );
-    console.log('Resolved template path:', templatePath);
-
-    const template = await readFile(templatePath, 'utf-8');
-
-    // Inject probabilities into the template
-    const filledModel = injectProbabilities(template, tokens);
-
-    // output filled model into output/filled_models for debugging
-    await fs.promises.mkdir('output/filled_models', { recursive: true });
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `output/filled_models/${player1Name}_vs_${player2Name}_${timestamp}.pcsp`;
-    await fs.promises.writeFile(filename, filledModel);
-    console.log(`Filled model written to ${filename}`);
-
-    const p1WinProb = await runPat(filledModel);
+    console.log('fetchPlayerStats - Resolved template path:', templatePath);
 
     return {
-      player1WinProbability: p1WinProb,
+      // player1WinProbability: p1WinProb,
       modelUsed: templatePath,
     };
   },
