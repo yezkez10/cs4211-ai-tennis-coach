@@ -9,7 +9,7 @@ import {
 import { conversation } from 'db/schema/conversation';
 
 export const message = pgTable(
-  'messages',
+  'message',
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     parentMessageId: integer(),

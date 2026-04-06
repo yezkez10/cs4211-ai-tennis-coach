@@ -10,7 +10,7 @@ async function findClosestPlayerName(
     SELECT 
       player1_name AS matched_name,
       similarity(player1_name, ${playerName}) AS similarity
-    FROM tennis_data.shots
+    FROM public.shot
     GROUP BY player1_name
     HAVING similarity(player1_name, ${playerName}) > 0.3
     ORDER BY similarity DESC
@@ -30,7 +30,7 @@ async function queryServeDirections(playerName: string) {
       COUNT(*) FILTER (WHERE direction = 5) AS serve_body,
       COUNT(*) FILTER (WHERE direction = 4) AS serve_wide,
       COUNT(*) FILTER (WHERE direction IN (4,5,6)) AS serve_total
-    FROM tennis_data.shots
+    FROM public.shot
     WHERE player1_name = ${playerName}
       AND shot_type IN (1, 2)
       AND from_court IN (1, 3)
@@ -51,7 +51,7 @@ async function queryServeOutcomes(playerName: string) {
       COUNT(*) FILTER (WHERE shot_outcome = 2)   AS faults,
       COUNT(*) FILTER (WHERE shot_outcome = 7)   AS in_play,
       COUNT(*)                                   AS total
-    FROM tennis_data.shots
+    FROM public.shot
     WHERE player1_name = ${playerName}
       AND shot_type IN (1, 2)
       AND from_court IN (1, 3)
@@ -71,10 +71,10 @@ async function queryReturnOutcomes(playerName: string) {
       COUNT(*) FILTER (WHERE shot_outcome IN (3,4)) AS return_errors,
       COUNT(*) FILTER (WHERE shot_outcome = 7)      AS return_in_play,
       COUNT(*)                                      AS total
-    FROM tennis_data.shots
+    FROM public.shot
     WHERE player2_name = ${playerName}
       AND shot_type = 3
-      AND from_court IN (1, 3)
+      AND from_court IN (1, 2, 3)
       AND prev_direction IN (4, 5, 6)
     GROUP BY player2_hand, prev_direction, from_court
     ORDER BY from_court, prev_direction
@@ -91,7 +91,7 @@ async function queryRallyOutcomes(playerName: string) {
       COUNT(*) FILTER (WHERE direction = 7)         AS crosscourt,
       COUNT(*) FILTER (WHERE direction = 8)         AS downline,
       COUNT(*)                                      AS total
-    FROM tennis_data.shots
+    FROM public.shot
     WHERE player1_name = ${playerName}
       AND shot_type = 4
     GROUP BY from_court
@@ -103,7 +103,7 @@ async function queryRallyOutcomes(playerName: string) {
 async function queryHandedness(playerName: string) {
   const result = await db.execute(sql`
     SELECT DISTINCT player1_hand AS hand
-    FROM tennis_data.shots
+    FROM public.shot
     WHERE player1_name = ${playerName}
     LIMIT 1
   `);

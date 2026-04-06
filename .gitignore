@@ -14,4 +14,4 @@ reports/
 .env.production
 
 # ignore raw data file (too big)
-data/raw/
+server/src/db/seed/raw
